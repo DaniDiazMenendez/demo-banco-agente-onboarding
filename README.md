@@ -14,6 +14,8 @@ Esta demo es un frontend estático para GitHub Pages. La IA no está conectada a
 - Instrucciones del agente listas para copiar.
 - 6 preguntas de prueba.
 - Chat simulado que responde con citas de fuente.
+- Rutas recomendadas dentro de la app para cada producto.
+- Guías visuales de 3 pasos para cuenta, tarjeta, préstamo, plazo fijo y seguro.
 
 ## Deploy
 

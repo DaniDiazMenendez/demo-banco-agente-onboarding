@@ -159,6 +159,10 @@
       grid-template-columns: 360px minmax(0, 1fr);
       gap: 20px;
       align-items: start;
+      margin-top: 20px;
+    }
+    .layout > section {
+      grid-column: 1 / -1;
     }
     .sidebar {
       display: grid;
@@ -196,6 +200,13 @@
       grid-template-columns: minmax(0, 1fr) 420px;
       gap: 20px;
     }
+    .assistant-stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
     .kb-grid {
       display: grid;
       gap: 12px;
@@ -231,7 +242,10 @@
     .chat {
       display: grid;
       grid-template-rows: auto 1fr auto;
-      min-height: 640px;
+      min-height: 680px;
+    }
+    .chat.featured {
+      min-height: 760px;
     }
     .messages {
       overflow: auto;
@@ -240,6 +254,9 @@
       align-content: start;
       padding: 12px 0;
       max-height: 460px;
+    }
+    .featured .messages {
+      max-height: 560px;
     }
     .msg {
       max-width: 88%;
@@ -292,6 +309,8 @@
       gap: 7px;
       align-content: start;
       margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
     }
     .phone-bar {
       height: 8px;
@@ -306,6 +325,28 @@
       background: var(--cp-accent-soft);
     }
     .phone-line.strong { background: var(--cp-accent); }
+    .phone-chip {
+      display: inline-block;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .phone-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-top: auto;
+    }
+    .phone-dot {
+      height: 14px;
+      border-radius: 6px;
+      background: var(--cp-border);
+    }
+    .phone-dot.active { background: var(--cp-accent); }
     .phone-step strong {
       display: block;
       font-size: 12px;
@@ -402,7 +443,7 @@
     .tab.active { color: var(--cp-accent); border-color: var(--cp-accent); font-weight: 700; }
     .hidden { display: none; }
     @media (max-width: 1100px) {
-      .hero, .layout, .main-grid { grid-template-columns: 1fr; }
+      .hero, .layout, .main-grid, .assistant-stage { grid-template-columns: 1fr; }
       .sidebar { position: static; }
       .grid-3 { grid-template-columns: 1fr; }
       .app-steps { grid-template-columns: 1fr; }
@@ -441,7 +482,21 @@
       </article>
     </section>
 
-    <section class="layout">
+    <section class="assistant-stage">
+      <article class="card chat featured">
+        <div>
+          <h2>Asistente Banco Nova</h2>
+          <p>Probá consultas de cliente. El asistente responde sólo sobre productos bancarios disponibles en la base, muestra ruta recomendada en la app y cita fuente.</p>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div>
+          <div class="quick" id="quickQuestions"></div>
+          <div class="composer">
+            <input id="userInput" placeholder="Ej: ¿Cómo sé si tengo un préstamo disponible?">
+            <button class="primary" id="sendBtn">Enviar</button>
+          </div>
+        </div>
+      </article>
       <aside class="sidebar">
         <article class="card">
           <h2>Productos de la KB</h2>
@@ -468,8 +523,10 @@
           Para una versión productiva, el agente puede conectarse a identidad, CRM, core bancario, originación digital y handoff a contact center, manteniendo respuestas trazables a conocimiento aprobado.
         </article>
       </aside>
+    </section>
 
-      <section class="main-grid">
+    <section class="layout">
+      <section>
         <article class="card">
           <div class="tabs">
             <button class="tab active" data-tab="kb">Base de conocimiento</button>
@@ -479,21 +536,6 @@
           <div id="kbTab"></div>
           <div id="instructionsTab" class="hidden"></div>
           <div id="testsTab" class="hidden"></div>
-        </article>
-
-        <article class="card chat">
-          <div>
-            <h2>Asistente Banco Nova</h2>
-            <p>Probá consultas de cliente. El asistente responde sólo sobre productos bancarios disponibles en la base y cita fuente.</p>
-          </div>
-          <div class="messages" id="messages"></div>
-          <div>
-            <div class="quick" id="quickQuestions"></div>
-            <div class="composer">
-              <input id="userInput" placeholder="Ej: ¿Qué necesito para abrir una cuenta?">
-              <button class="primary" id="sendBtn">Enviar</button>
-            </div>
-          </div>
         </article>
       </section>
     </section>
@@ -673,41 +715,78 @@ Reglas:
       quickQuestions.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => ask(btn.dataset.question)));
     }
 
+    const APP_GUIDES = {
+      cuenta: {
+        route: "App Banco Nova > Inicio > Abrir cuenta",
+        steps: [
+          ["Inicio", "Tocá Abrir cuenta o Hacete cliente.", "Abrir cuenta"],
+          ["Validación", "Cargá DNI, correo, celular y selfie.", "Validar identidad"],
+          ["Activación", "Configurá clave y revisá CBU/alias.", "Cuenta activa"]
+        ]
+      },
+      tarjeta: {
+        route: "App Banco Nova > Productos > Tarjetas",
+        steps: [
+          ["Productos", "Entrá en Tarjetas desde Productos.", "Tarjetas"],
+          ["Solicitud", "Revisá límite y condiciones disponibles.", "Solicitar"],
+          ["Seguimiento", "Consultá entrega, resumen y pausa.", "Estado"]
+        ]
+      },
+      prestamo: {
+        route: "App Banco Nova > Productos > Préstamos",
+        steps: [
+          ["Inicio", "Abrí la app y entrá en Productos.", "Productos"],
+          ["Préstamos", "Seleccioná Préstamos para ver ofertas.", "Préstamos"],
+          ["Oferta", "Revisá monto, cuota, tasa y condiciones.", "Ver oferta"]
+        ]
+      },
+      plazo: {
+        route: "App Banco Nova > Inversiones > Plazo fijo",
+        steps: [
+          ["Inversiones", "Entrá en Inversiones desde el menú.", "Inversiones"],
+          ["Plazo fijo", "Elegí monto, plazo y renovación.", "Simular"],
+          ["Confirmación", "Revisá tasa y rendimiento antes de confirmar.", "Confirmar"]
+        ]
+      },
+      seguro: {
+        route: "App Banco Nova > Productos > Seguros",
+        steps: [
+          ["Seguros", "Entrá en Productos y seleccioná Seguros.", "Seguros"],
+          ["Póliza", "Consultá cobertura, vigencia y certificado.", "Mi póliza"],
+          ["Siniestro", "Iniciá denuncia o pedí asistencia.", "Denunciar"]
+        ]
+      }
+    };
+
     function appGuideHtml(productId) {
-      if (productId !== "prestamo") return "";
+      const guide = APP_GUIDES[productId];
+      if (!guide) return "";
       return `
         <div class="app-steps" aria-label="Guía visual en app">
-          <div class="phone-step">
-            <div class="phone">
-              <div class="phone-bar"></div>
-              <div class="phone-line strong" style="width: 72%;"></div>
-              <div class="phone-line" style="width: 54%;"></div>
-              <div class="phone-line" style="width: 88%;"></div>
+          ${guide.steps.map(([title, body, chip], index) => `
+            <div class="phone-step">
+              <div class="phone">
+                <div class="phone-bar"></div>
+                <span class="phone-chip">${chip}</span>
+                <div class="phone-line ${index === 0 ? "strong" : ""}" style="width: ${72 - index * 6}%;"></div>
+                <div class="phone-line ${index === 1 ? "strong" : ""}" style="width: ${54 + index * 10}%;"></div>
+                <div class="phone-line ${index === 2 ? "strong" : ""}" style="width: ${88 - index * 12}%;"></div>
+                <div class="phone-nav">
+                  <div class="phone-dot ${index === 0 ? "active" : ""}"></div>
+                  <div class="phone-dot ${index === 1 ? "active" : ""}"></div>
+                  <div class="phone-dot ${index === 2 ? "active" : ""}"></div>
+                </div>
+              </div>
+              <strong>${index + 1}. ${title}</strong>
+              <small>${body}</small>
             </div>
-            <strong>1. Inicio</strong>
-            <small>Abrí la app y entrá en Productos.</small>
-          </div>
-          <div class="phone-step">
-            <div class="phone">
-              <div class="phone-bar"></div>
-              <div class="phone-line" style="width: 80%;"></div>
-              <div class="phone-line strong" style="width: 64%;"></div>
-              <div class="phone-line" style="width: 72%;"></div>
-            </div>
-            <strong>2. Préstamos</strong>
-            <small>Seleccioná Préstamos para ver ofertas.</small>
-          </div>
-          <div class="phone-step">
-            <div class="phone">
-              <div class="phone-bar"></div>
-              <div class="phone-line strong" style="width: 90%;"></div>
-              <div class="phone-line" style="width: 68%;"></div>
-              <div class="phone-line" style="width: 46%;"></div>
-            </div>
-            <strong>3. Oferta</strong>
-            <small>Revisá monto, cuota, tasa y condiciones.</small>
-          </div>
-        </div>`;
+          `).join("")}
+        </div>
+        <div class="source" style="margin-top: 10px;">Ruta recomendada: ${guide.route}</div>`;
+    }
+
+    function routeForProduct(productId) {
+      return APP_GUIDES[productId]?.route || "App Banco Nova";
     }
 
     function addMessage(text, type, citations = [], extraHtml = "") {
@@ -763,11 +842,14 @@ Reglas:
         addMessage("No tengo información suficiente en la base aprobada para responder esa consulta. Puedo ayudarte con cuenta, tarjeta, préstamo, plazo fijo o seguro; para otros temas, te derivo a un asesor.", "bot", ["Política: no inventar"]);
         return;
       }
-      const onboarding = hit.product.id === "cuenta"
-        ? "Para avanzar con el onboarding, el siguiente paso sería validar identidad con DNI vigente, correo, celular y selfie desde la app."
-        : hit.product.id === "prestamo"
-          ? "Ruta recomendada: App Banco Nova > Productos > Préstamos. Desde ahí podés revisar ofertas disponibles, simular condiciones o iniciar una evaluación."
-          : "Para avanzar, revisá la sección correspondiente en la app y confirmá condiciones antes de continuar.";
+      const productActions = {
+        cuenta: "Ruta recomendada: App Banco Nova > Inicio > Abrir cuenta. Desde ahí podés iniciar el alta, validar identidad y consultar CBU/alias al finalizar.",
+        tarjeta: "Ruta recomendada: App Banco Nova > Productos > Tarjetas. Desde ahí podés solicitar tarjeta, consultar límite, ver resumen o pausar la tarjeta.",
+        prestamo: "Ruta recomendada: App Banco Nova > Productos > Préstamos. Desde ahí podés revisar ofertas disponibles, simular condiciones o iniciar una evaluación.",
+        plazo: "Ruta recomendada: App Banco Nova > Inversiones > Plazo fijo. Desde ahí podés simular monto, plazo, tasa y confirmar la operación.",
+        seguro: "Ruta recomendada: App Banco Nova > Productos > Seguros. Desde ahí podés consultar póliza, descargar certificado o iniciar una denuncia."
+      };
+      const onboarding = productActions[hit.product.id] || `Ruta recomendada: ${routeForProduct(hit.product.id)}.`;
       addMessage(`${hit.answer}<br><br>${onboarding}`, "bot", [hit.product.source], appGuideHtml(hit.product.id));
     }
 
