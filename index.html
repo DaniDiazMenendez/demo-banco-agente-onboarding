@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo | Agente bancario de consultas y onboarding</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b11f4b'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Arial' font-size='18' font-weight='700' fill='white'%3EB%3C/text%3E%3C/svg%3E">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 24px;
+      background: var(--cp-bg-elevated);
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-weight: 800;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .shell {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1.05; margin-bottom: 16px; }
+    h2 { font-size: 20px; margin-bottom: 12px; }
+    h3 { font-size: 16px; margin-bottom: 8px; }
+    p { color: var(--cp-text-muted); line-height: 1.45; }
+    .accent { color: var(--cp-accent); }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .metric {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .metric strong { display: block; font-size: 24px; margin-top: 4px; }
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .sidebar {
+      display: grid;
+      gap: 14px;
+      position: sticky;
+      top: 76px;
+    }
+    .product-list { display: grid; gap: 10px; }
+    .product-btn {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
+      align-items: center;
+      text-align: left;
+      padding: 12px;
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 12px;
+    }
+    .product-btn.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      font-weight: 800;
+    }
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 20px;
+    }
+    .kb-grid {
+      display: grid;
+      gap: 12px;
+    }
+    details {
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      background: var(--cp-surface-soft);
+      padding: 12px 14px;
+    }
+    summary { cursor: pointer; font-weight: 700; }
+    .source {
+      display: inline-flex;
+      margin-top: 8px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      background: var(--cp-surface);
+    }
+    .chat {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 640px;
+    }
+    .messages {
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      padding: 12px 0;
+      max-height: 460px;
+    }
+    .msg {
+      max-width: 88%;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface-soft);
+      line-height: 1.4;
+    }
+    .msg.user {
+      justify-self: end;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-color: var(--cp-accent);
+    }
+    .msg.bot { justify-self: start; }
+    .citations {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .citation {
+      border-radius: 999px;
+      border: 1px solid var(--cp-border);
+      padding: 4px 8px;
+      font-size: 12px;
+      color: var(--cp-text-muted);
+      background: var(--cp-surface);
+    }
+    .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .quick button, .secondary {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      border-top: 1px solid var(--cp-border);
+      padding-top: 12px;
+    }
+    .composer input {
+      border: 1px solid var(--cp-border-strong);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 999px;
+      padding: 12px 14px;
+      width: 100%;
+    }
+    .primary {
+      border: 1px solid var(--cp-accent);
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 700;
+    }
+    .notice {
+      border: 1px solid var(--cp-warning);
+      background: var(--cp-highlight);
+      color: var(--cp-text);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: Consolas, "Courier New", Courier, monospace;
+      color: var(--cp-text);
+      overflow: auto;
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+    }
+    .tab.active { color: var(--cp-accent); border-color: var(--cp-accent); font-weight: 700; }
+    .hidden { display: none; }
+    @media (max-width: 1100px) {
+      .hero, .layout, .main-grid { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="logo">B</div><span>Banco Nova · Demo AI</span></div>
+    <div class="pill-row">
+      <span class="pill">Industria: Servicios financieros</span>
+      <span class="pill">Frontend estático</span>
+      <span class="pill">IA simulada</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <article class="card">
+        <div class="pill-row">
+          <span class="pill">Copilot Studio</span>
+          <span class="pill">Azure AI Foundry</span>
+          <span class="pill">Knowledge grounding simulado</span>
+        </div>
+        <h1>Agente de consultas y onboarding bancario</h1>
+        <p>Demo para atención digital: responde preguntas frecuentes sobre productos bancarios, guía el onboarding y cita la fuente de la base de conocimiento. No hay conexión real a IA; las respuestas están simuladas en el frontend.</p>
+      </article>
+      <article class="card">
+        <h2>Valor esperado</h2>
+        <div class="grid-3">
+          <div class="metric"><span>Deflexión</span><strong>35%</strong></div>
+          <div class="metric"><span>Atención</span><strong>24/7</strong></div>
+          <div class="metric"><span>Fuentes citadas</span><strong>100%</strong></div>
+        </div>
+        <p style="margin-top: 14px;">Objetivo: resolver consultas repetitivas, reducir carga del contact center y estandarizar respuestas con base aprobada.</p>
+      </article>
+    </section>
+
+    <section class="layout">
+      <aside class="sidebar">
+        <article class="card">
+          <h2>Productos de la KB</h2>
+          <div class="product-list" id="productList"></div>
+        </article>
+        <article class="notice">
+          Esta demo simula el comportamiento de un agente. Para producción, Copilot Studio conectaría canales, autenticación y acciones; Azure AI Foundry aportaría evaluación, trazas, modelos y grounding.
+        </article>
+      </aside>
+
+      <section class="main-grid">
+        <article class="card">
+          <div class="tabs">
+            <button class="tab active" data-tab="kb">Base de conocimiento</button>
+            <button class="tab" data-tab="instructions">Instrucciones</button>
+            <button class="tab" data-tab="tests">Pruebas</button>
+          </div>
+          <div id="kbTab"></div>
+          <div id="instructionsTab" class="hidden"></div>
+          <div id="testsTab" class="hidden"></div>
+        </article>
+
+        <article class="card chat">
+          <div>
+            <h2>Agente simulado</h2>
+            <p>Probá consultas de cliente. El agente sólo responde con la base de conocimiento y cita fuente.</p>
+          </div>
+          <div class="messages" id="messages"></div>
+          <div>
+            <div class="quick" id="quickQuestions"></div>
+            <div class="composer">
+              <input id="userInput" placeholder="Escribí una consulta bancaria...">
+              <button class="primary" id="sendBtn">Enviar</button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const KB = [
+      {
+        id: "cuenta",
+        icon: "C",
+        title: "Cuenta bancaria",
+        source: "KB-CUENTA-001",
+        summary: "Cuenta sueldo o caja de ahorro digital con apertura desde la app.",
+        faqs: [
+          ["¿Qué necesito para abrir una cuenta?", "DNI vigente, correo electrónico, teléfono celular y validación de identidad por selfie."],
+          ["¿Tiene costo de mantenimiento?", "La caja de ahorro digital no tiene costo de mantenimiento mensual."],
+          ["¿Cuánto tarda la apertura?", "La apertura puede completarse en pocos minutos si la validación de identidad es exitosa."],
+          ["¿Puedo recibir transferencias?", "Sí. La cuenta incluye CBU y alias para recibir transferencias."],
+          ["¿Cómo activo la cuenta?", "Después de la validación, la app muestra el estado de alta y permite configurar clave de acceso."]
+        ]
+      },
+      {
+        id: "tarjeta",
+        icon: "T",
+        title: "Tarjeta de crédito",
+        source: "KB-TARJETA-002",
+        summary: "Tarjeta sujeta a evaluación crediticia, con resumen digital y alertas.",
+        faqs: [
+          ["¿Cómo solicito una tarjeta?", "Se puede solicitar desde la app o web completando datos personales y aceptando la evaluación crediticia."],
+          ["¿Cuándo llega la tarjeta?", "El plazo estimado de entrega es de 5 a 10 días hábiles según domicilio."],
+          ["¿Cómo veo el límite?", "El límite disponible se consulta desde la sección Tarjetas de la app."],
+          ["¿Puedo pausar la tarjeta?", "Sí. Desde la app se puede pausar temporalmente por seguridad."],
+          ["¿Dónde veo el resumen?", "El resumen se publica en formato digital antes del vencimiento."]
+        ]
+      },
+      {
+        id: "prestamo",
+        icon: "P",
+        title: "Préstamo personal",
+        source: "KB-PRESTAMO-003",
+        summary: "Oferta preaprobada o solicitud con evaluación, cuotas fijas y acreditación en cuenta.",
+        faqs: [
+          ["¿Cómo sé si tengo un préstamo disponible?", "La app muestra ofertas preaprobadas si están disponibles para el perfil del cliente."],
+          ["¿En cuánto tiempo se acredita?", "Una vez aprobado y aceptadas las condiciones, la acreditación puede ser inmediata en la cuenta."],
+          ["¿Puedo cancelar anticipadamente?", "Sí, la cancelación anticipada se solicita desde canales digitales o sucursal."],
+          ["¿Las cuotas son fijas?", "Las ofertas informan tipo de tasa, plazo, monto de cuota y costo financiero antes de confirmar."],
+          ["¿Qué documentación necesito?", "Puede requerirse DNI, comprobante de ingresos o información adicional según evaluación."]
+        ]
+      },
+      {
+        id: "plazo",
+        icon: "F",
+        title: "Plazo fijo",
+        source: "KB-PLAZO-004",
+        summary: "Constitución digital con monto, plazo y tasa visibles antes de confirmar.",
+        faqs: [
+          ["¿Cuál es el monto mínimo?", "El monto mínimo se informa en la app al iniciar la constitución del plazo fijo."],
+          ["¿Puedo cancelarlo antes?", "El plazo fijo tradicional no permite cancelación anticipada salvo productos específicamente precancelables."],
+          ["¿Dónde veo la tasa?", "La tasa nominal anual y el rendimiento estimado se muestran antes de confirmar."],
+          ["¿Qué pasa al vencimiento?", "El capital e intereses se acreditan en la cuenta o se renuevan si elegiste renovación automática."],
+          ["¿Puedo hacerlo online?", "Sí. Se puede constituir desde home banking o app móvil."]
+        ]
+      },
+      {
+        id: "seguro",
+        icon: "S",
+        title: "Seguro",
+        source: "KB-SEGURO-005",
+        summary: "Coberturas para hogar, bolso protegido y vida, con contratación digital.",
+        faqs: [
+          ["¿Qué seguros puedo contratar?", "La oferta incluye seguros de hogar, bolso protegido y vida, sujetos a disponibilidad."],
+          ["¿Cómo denuncio un siniestro?", "La denuncia se inicia desde la app o línea de atención de la aseguradora indicada en la póliza."],
+          ["¿Dónde veo mi póliza?", "La póliza se consulta y descarga desde la sección Seguros."],
+          ["¿Puedo dar de baja un seguro?", "Sí. La baja se solicita desde canales digitales o atención al cliente."],
+          ["¿Cuándo empieza la cobertura?", "La vigencia se informa en el certificado de cobertura emitido al contratar."]
+        ]
+      }
+    ];
+
+    const TEST_QUESTIONS = [
+      "¿Qué necesito para abrir una cuenta?",
+      "¿Cuánto tarda en llegar la tarjeta?",
+      "¿Puedo cancelar un préstamo antes de tiempo?",
+      "¿Dónde veo la tasa del plazo fijo?",
+      "¿Cómo denuncio un siniestro?",
+      "¿Qué producto me conviene si quiero empezar a operar hoy?"
+    ];
+
+    const AGENT_INSTRUCTIONS = `Rol:
+Sos un agente bancario digital para consultas y onboarding.
+
+Reglas:
+1. Respondé solo con la base de conocimiento provista.
+2. Citá siempre la fuente usada, por ejemplo [KB-CUENTA-001].
+3. Si la información no está en la base, indicá que no tenés datos suficientes y derivá a un asesor.
+4. No inventes tasas, límites, cargos, promociones ni requisitos.
+5. Para onboarding, guiá el próximo paso sin solicitar datos sensibles en el chat.
+6. Usá lenguaje claro, breve y profesional.`;
+
+    let selectedProduct = "cuenta";
+
+    const productList = document.getElementById("productList");
+    const kbTab = document.getElementById("kbTab");
+    const instructionsTab = document.getElementById("instructionsTab");
+    const testsTab = document.getElementById("testsTab");
+    const messages = document.getElementById("messages");
+    const quickQuestions = document.getElementById("quickQuestions");
+    const userInput = document.getElementById("userInput");
+
+    function renderProducts() {
+      productList.innerHTML = KB.map(product => `
+        <button class="product-btn ${product.id === selectedProduct ? "active" : ""}" data-product="${product.id}">
+          <span class="icon">${product.icon}</span>
+          <span><strong>${product.title}</strong><br><small>${product.source}</small></span>
+        </button>
+      `).join("");
+      productList.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedProduct = btn.dataset.product;
+          renderProducts();
+          renderKb();
+        });
+      });
+    }
+
+    function renderKb() {
+      const product = KB.find(item => item.id === selectedProduct);
+      kbTab.innerHTML = `
+        <h2>${product.title}</h2>
+        <p>${product.summary}</p>
+        <span class="source">Fuente: ${product.source}</span>
+        <div class="kb-grid" style="margin-top: 14px;">
+          ${product.faqs.map(([q, a]) => `
+            <details>
+              <summary>${q}</summary>
+              <p>${a}</p>
+              <span class="source">${product.source}</span>
+            </details>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderInstructions() {
+      instructionsTab.innerHTML = `
+        <h2>Instrucciones del agente</h2>
+        <p>Listas para copiar en Copilot Studio o como system/developer prompt en Azure AI Foundry.</p>
+        <pre>${AGENT_INSTRUCTIONS}</pre>
+        <button class="secondary" id="copyInstructions">Copiar instrucciones</button>
+      `;
+      document.getElementById("copyInstructions").addEventListener("click", () => navigator.clipboard.writeText(AGENT_INSTRUCTIONS));
+    }
+
+    function renderTests() {
+      testsTab.innerHTML = `
+        <h2>Preguntas de prueba</h2>
+        <p>Usalas para validar grounding, derivación y calidad de respuesta.</p>
+        <div class="kb-grid">
+          ${TEST_QUESTIONS.map((question, index) => `
+            <details open>
+              <summary>Prueba ${index + 1}</summary>
+              <p>${question}</p>
+              <button class="secondary" data-test="${question}">Probar en chat</button>
+            </details>
+          `).join("")}
+        </div>
+      `;
+      testsTab.querySelectorAll("[data-test]").forEach(btn => btn.addEventListener("click", () => ask(btn.dataset.test)));
+    }
+
+    function renderQuickQuestions() {
+      quickQuestions.innerHTML = TEST_QUESTIONS.slice(0, 4).map(question => `<button data-question="${question}">${question}</button>`).join("");
+      quickQuestions.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => ask(btn.dataset.question)));
+    }
+
+    function addMessage(text, type, citations = []) {
+      const div = document.createElement("div");
+      div.className = `msg ${type}`;
+      div.innerHTML = `<div>${text}</div>${citations.length ? `<div class="citations">${citations.map(c => `<span class="citation">${c}</span>`).join("")}</div>` : ""}`;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function normalize(text) {
+      return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function findAnswer(question) {
+      const q = normalize(question);
+      const scored = [];
+      KB.forEach(product => {
+        product.faqs.forEach(([faq, answer]) => {
+          const text = normalize(`${product.title} ${faq} ${answer}`);
+          let score = 0;
+          q.split(/\s+/).filter(w => w.length > 3).forEach(word => {
+            if (text.includes(word)) score += 1;
+          });
+          if (q.includes("abrir") && product.id === "cuenta") score += 4;
+          if (q.includes("tarjeta") && product.id === "tarjeta") score += 4;
+          if (q.includes("prestamo") && product.id === "prestamo") score += 4;
+          if (q.includes("plazo") && product.id === "plazo") score += 4;
+          if (q.includes("seguro") || q.includes("siniestro")) score += product.id === "seguro" ? 4 : 0;
+          scored.push({ product, faq, answer, score });
+        });
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored[0].score > 0 ? scored[0] : null;
+    }
+
+    function ask(question) {
+      addMessage(question, "user");
+      const hit = findAnswer(question);
+      if (!hit) {
+        addMessage("No tengo información suficiente en la base aprobada para responder esa consulta. Puedo derivarte a un asesor para evitar darte información incorrecta.", "bot", ["Política: no inventar"]);
+        return;
+      }
+      const onboarding = hit.product.id === "cuenta"
+        ? "Para avanzar con el onboarding, el siguiente paso sería validar identidad con DNI vigente, correo, celular y selfie desde la app."
+        : "Para avanzar, revisá la sección correspondiente en la app y confirmá condiciones antes de continuar.";
+      addMessage(`${hit.answer}<br><br>${onboarding}`, "bot", [hit.product.source]);
+    }
+
+    function initTabs() {
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+          kbTab.classList.toggle("hidden", tab.dataset.tab !== "kb");
+          instructionsTab.classList.toggle("hidden", tab.dataset.tab !== "instructions");
+          testsTab.classList.toggle("hidden", tab.dataset.tab !== "tests");
+        });
+      });
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const value = userInput.value.trim();
+      if (!value) return;
+      userInput.value = "";
+      ask(value);
+    });
+    userInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") document.getElementById("sendBtn").click();
+    });
+
+    renderProducts();
+    renderKb();
+    renderInstructions();
+    renderTests();
+    renderQuickQuestions();
+    initTabs();
+    addMessage("Hola, soy el agente digital de Banco Nova. Puedo responder consultas sobre cuenta, tarjeta, préstamo, plazo fijo y seguro usando la base aprobada.", "bot", ["KB demo"]);
+  </script>
+</body>
+</html>
