@@ -270,6 +270,51 @@
       color: var(--cp-text-muted);
       background: var(--cp-surface);
     }
+    .app-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .phone-step {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      background: var(--cp-surface);
+      padding: 10px;
+    }
+    .phone {
+      min-height: 104px;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 16px;
+      background: var(--cp-surface-soft);
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+      align-content: start;
+      margin-bottom: 8px;
+    }
+    .phone-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--cp-border-strong);
+      width: 48px;
+      margin: 0 auto 4px;
+    }
+    .phone-line {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--cp-accent-soft);
+    }
+    .phone-line.strong { background: var(--cp-accent); }
+    .phone-step strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+    .phone-step small {
+      color: var(--cp-text-muted);
+      line-height: 1.3;
+    }
     .quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .quick button, .secondary {
       border: 1px solid var(--cp-border);
@@ -360,6 +405,7 @@
       .hero, .layout, .main-grid { grid-template-columns: 1fr; }
       .sidebar { position: static; }
       .grid-3 { grid-template-columns: 1fr; }
+      .app-steps { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -490,11 +536,11 @@
         source: "KB-PRESTAMO-003",
         summary: "Oferta preaprobada o solicitud con evaluación, cuotas fijas y acreditación en cuenta.",
         faqs: [
-          ["¿Cómo sé si tengo un préstamo disponible?", "La app muestra ofertas preaprobadas si están disponibles para el perfil del cliente."],
-          ["¿En cuánto tiempo se acredita?", "Una vez aprobado y aceptadas las condiciones, la acreditación puede ser inmediata en la cuenta."],
-          ["¿Puedo cancelar anticipadamente?", "Sí, la cancelación anticipada se solicita desde canales digitales o sucursal."],
-          ["¿Las cuotas son fijas?", "Las ofertas informan tipo de tasa, plazo, monto de cuota y costo financiero antes de confirmar."],
-          ["¿Qué documentación necesito?", "Puede requerirse DNI, comprobante de ingresos o información adicional según evaluación."]
+          ["¿Cómo sé si tengo un préstamo disponible?", "Ingresá a la app Banco Nova y seguí la ruta: Inicio > Productos > Préstamos. Si tenés una oferta preaprobada, vas a ver monto disponible, plazo, cuota estimada y botón para simular o continuar. Si no aparece oferta, podés iniciar una solicitud desde Productos > Préstamos > Solicitar evaluación."],
+          ["¿En cuánto tiempo se acredita?", "Si la oferta ya está preaprobada, después de aceptar condiciones y validar identidad, la acreditación puede ser inmediata en tu cuenta. Ruta sugerida: App > Productos > Préstamos > Oferta disponible > Confirmar."],
+          ["¿Puedo cancelar anticipadamente?", "Sí. Desde la app podés consultar la opción en Productos > Préstamos > Mis préstamos > Detalle > Cancelación anticipada. Si la opción no está visible, el asistente puede derivarte a un asesor."],
+          ["¿Las cuotas son fijas?", "Antes de confirmar, la app muestra monto solicitado, plazo, cuota estimada, tasa y costo financiero. Revisalo en Productos > Préstamos > Simular préstamo > Ver detalle de condiciones."],
+          ["¿Qué documentación necesito?", "Puede requerirse DNI, comprobante de ingresos o información adicional según evaluación. La app indica los documentos pendientes en Productos > Préstamos > Solicitud en curso > Documentación."]
         ]
       },
       {
@@ -627,10 +673,47 @@ Reglas:
       quickQuestions.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => ask(btn.dataset.question)));
     }
 
-    function addMessage(text, type, citations = []) {
+    function appGuideHtml(productId) {
+      if (productId !== "prestamo") return "";
+      return `
+        <div class="app-steps" aria-label="Guía visual en app">
+          <div class="phone-step">
+            <div class="phone">
+              <div class="phone-bar"></div>
+              <div class="phone-line strong" style="width: 72%;"></div>
+              <div class="phone-line" style="width: 54%;"></div>
+              <div class="phone-line" style="width: 88%;"></div>
+            </div>
+            <strong>1. Inicio</strong>
+            <small>Abrí la app y entrá en Productos.</small>
+          </div>
+          <div class="phone-step">
+            <div class="phone">
+              <div class="phone-bar"></div>
+              <div class="phone-line" style="width: 80%;"></div>
+              <div class="phone-line strong" style="width: 64%;"></div>
+              <div class="phone-line" style="width: 72%;"></div>
+            </div>
+            <strong>2. Préstamos</strong>
+            <small>Seleccioná Préstamos para ver ofertas.</small>
+          </div>
+          <div class="phone-step">
+            <div class="phone">
+              <div class="phone-bar"></div>
+              <div class="phone-line strong" style="width: 90%;"></div>
+              <div class="phone-line" style="width: 68%;"></div>
+              <div class="phone-line" style="width: 46%;"></div>
+            </div>
+            <strong>3. Oferta</strong>
+            <small>Revisá monto, cuota, tasa y condiciones.</small>
+          </div>
+        </div>`;
+    }
+
+    function addMessage(text, type, citations = [], extraHtml = "") {
       const div = document.createElement("div");
       div.className = `msg ${type}`;
-      div.innerHTML = `<div>${text}</div>${citations.length ? `<div class="citations">${citations.map(c => `<span class="citation">${c}</span>`).join("")}</div>` : ""}`;
+      div.innerHTML = `<div>${text}</div>${extraHtml}${citations.length ? `<div class="citations">${citations.map(c => `<span class="citation">${c}</span>`).join("")}</div>` : ""}`;
       messages.appendChild(div);
       messages.scrollTop = messages.scrollHeight;
     }
@@ -682,8 +765,10 @@ Reglas:
       }
       const onboarding = hit.product.id === "cuenta"
         ? "Para avanzar con el onboarding, el siguiente paso sería validar identidad con DNI vigente, correo, celular y selfie desde la app."
-        : "Para avanzar, revisá la sección correspondiente en la app y confirmá condiciones antes de continuar.";
-      addMessage(`${hit.answer}<br><br>${onboarding}`, "bot", [hit.product.source]);
+        : hit.product.id === "prestamo"
+          ? "Ruta recomendada: App Banco Nova > Productos > Préstamos. Desde ahí podés revisar ofertas disponibles, simular condiciones o iniciar una evaluación."
+          : "Para avanzar, revisá la sección correspondiente en la app y confirmá condiciones antes de continuar.";
+      addMessage(`${hit.answer}<br><br>${onboarding}`, "bot", [hit.product.source], appGuideHtml(hit.product.id));
     }
 
     function initTabs() {
