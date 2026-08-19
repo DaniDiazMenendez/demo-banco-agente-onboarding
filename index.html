@@ -16,8 +16,8 @@
   <style>
     :root {
       color-scheme: light;
-      --cp-bg: #f7f4ef;
-      --cp-bg-elevated: #fcfbf8;
+      --cp-bg: #f4f8fc;
+      --cp-bg-elevated: #ffffff;
       --cp-surface: #ffffff;
       --cp-surface-soft: #f5f5f5;
       --cp-border: #dedede;
@@ -25,9 +25,9 @@
       --cp-text: #242424;
       --cp-text-muted: #5c5c5c;
       --cp-text-soft: #6f6f6f;
-      --cp-accent: #b11f4b;
-      --cp-accent-hover: #9a1a41;
-      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent: #0057b8;
+      --cp-accent-hover: #004494;
+      --cp-accent-soft: rgba(0, 87, 184, 0.10);
       --cp-accent-fg: #ffffff;
       --cp-success: #16a34a;
       --cp-danger: #dc2626;
@@ -38,23 +38,23 @@
       --cp-panel: rgba(255, 255, 255, 0.86);
       --cp-panel-strong: rgba(255, 255, 255, 0.96);
       --cp-sheen: rgba(255, 255, 255, 0.55);
-      --cp-highlight: rgba(177, 31, 75, 0.12);
+      --cp-highlight: rgba(0, 87, 184, 0.10);
     }
     html[data-theme="dark"] {
       color-scheme: dark;
-      --cp-bg: #3d3b3a;
-      --cp-bg-elevated: #343231;
-      --cp-surface: #292929;
-      --cp-surface-soft: #2e2e2e;
-      --cp-border: #474747;
-      --cp-border-strong: #5f5f5f;
-      --cp-text: #dedede;
-      --cp-text-muted: #919191;
-      --cp-text-soft: #b0b0b0;
-      --cp-accent: #fd8ea1;
-      --cp-accent-hover: #fb7b91;
-      --cp-accent-soft: rgba(253, 142, 161, 0.14);
-      --cp-accent-fg: #1a1a1a;
+      --cp-bg: #0b1726;
+      --cp-bg-elevated: #10243a;
+      --cp-surface: #132b44;
+      --cp-surface-soft: #173653;
+      --cp-border: #244762;
+      --cp-border-strong: #3e6687;
+      --cp-text: #f2f7fb;
+      --cp-text-muted: #b8c7d6;
+      --cp-text-soft: #d0dce7;
+      --cp-accent: #7db7ff;
+      --cp-accent-hover: #9bc8ff;
+      --cp-accent-soft: rgba(125, 183, 255, 0.16);
+      --cp-accent-fg: #071728;
       --cp-success: #4ade80;
       --cp-danger: #f87171;
       --cp-warning: #fbbf24;
@@ -64,7 +64,7 @@
       --cp-panel: rgba(41, 41, 41, 0.72);
       --cp-panel-strong: rgba(41, 41, 41, 0.96);
       --cp-sheen: rgba(255, 255, 255, 0.04);
-      --cp-highlight: rgba(253, 142, 161, 0.12);
+      --cp-highlight: rgba(125, 183, 255, 0.14);
     }
 
     * { box-sizing: border-box; }
@@ -131,6 +131,10 @@
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+    }
+    .hero .card:first-child {
+      border-color: var(--cp-border-strong);
+      background: var(--cp-panel-strong);
     }
     h1, h2, h3, p { margin-top: 0; }
     h1 { font-size: clamp(28px, 4vw, 48px); line-height: 1.05; margin-bottom: 16px; }
@@ -212,6 +216,17 @@
       color: var(--cp-text-muted);
       font-size: 12px;
       background: var(--cp-surface);
+    }
+    .source-card {
+      margin-top: 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--cp-surface);
+    }
+    .source-card strong {
+      display: block;
+      margin-bottom: 4px;
     }
     .chat {
       display: grid;
@@ -350,7 +365,7 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><div class="logo">B</div><span>Banco Nova · Demo AI</span></div>
+    <div class="brand"><div class="logo">B</div><span>Banco Nova</span></div>
     <div class="pill-row">
       <span class="pill">Industria: Servicios financieros</span>
       <span class="pill">Atención digital</span>
@@ -366,8 +381,8 @@
           <span class="pill">Azure AI Foundry</span>
           <span class="pill">Respuestas con fuentes</span>
         </div>
-        <h1>Agente de consultas y onboarding bancario</h1>
-        <p>Experiencia para atención digital: responde preguntas frecuentes sobre productos bancarios, guía el onboarding y cita la fuente de la base de conocimiento aprobada.</p>
+        <h1>Asistente de atención y onboarding bancario</h1>
+        <p>Experiencia para atención digital: resuelve consultas frecuentes, guía próximos pasos de alta y muestra la fuente aprobada usada en cada respuesta.</p>
       </article>
       <article class="card">
         <h2>Valor esperado</h2>
@@ -395,7 +410,7 @@
           </ul>
         </article>
         <article class="card">
-          <h2>Journey de onboarding</h2>
+          <h2>Journey de atención</h2>
           <ul class="journey-list">
             <li><span class="num">1</span><span>Entender intención del cliente y producto de interés.</span></li>
             <li><span class="num">2</span><span>Responder con base aprobada y citar fuente.</span></li>
@@ -422,14 +437,14 @@
 
         <article class="card chat">
           <div>
-            <h2>Agente digital</h2>
-            <p>Probá consultas de cliente. El agente sólo responde con la base de conocimiento y cita fuente.</p>
+            <h2>Asistente Banco Nova</h2>
+            <p>Probá consultas de cliente. El asistente responde sólo sobre productos bancarios disponibles en la base y cita fuente.</p>
           </div>
           <div class="messages" id="messages"></div>
           <div>
             <div class="quick" id="quickQuestions"></div>
             <div class="composer">
-              <input id="userInput" placeholder="Escribí una consulta bancaria...">
+              <input id="userInput" placeholder="Ej: ¿Qué necesito para abrir una cuenta?">
               <button class="primary" id="sendBtn">Enviar</button>
             </div>
           </div>
@@ -563,7 +578,11 @@ Reglas:
       kbTab.innerHTML = `
         <h2>${product.title}</h2>
         <p>${product.summary}</p>
-        <span class="source">Fuente: ${product.source}</span>
+        <div class="source-card">
+          <strong>Fuente aprobada</strong>
+          <span class="source">${product.source}</span>
+          <p style="margin-top: 8px; margin-bottom: 0;">Contenido usado por el asistente para responder consultas de ${product.title.toLowerCase()}.</p>
+        </div>
         <div class="kb-grid" style="margin-top: 14px;">
           ${product.faqs.map(([q, a]) => `
             <details>
@@ -620,14 +639,26 @@ Reglas:
       return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
+    function isBankingQuestion(question) {
+      const q = normalize(question);
+      const bankingTerms = [
+        "cuenta", "tarjeta", "prestamo", "plazo", "fijo", "seguro", "poliza", "siniestro",
+        "banco", "bancario", "transferencia", "cbu", "alias", "dni", "app", "home banking",
+        "resumen", "limite", "cuota", "tasa", "mantenimiento", "apertura", "onboarding",
+        "credito", "debito", "cliente", "asesor", "cobertura"
+      ];
+      return bankingTerms.some(term => q.includes(term));
+    }
+
     function findAnswer(question) {
       const q = normalize(question);
+      if (!isBankingQuestion(question)) return null;
       const scored = [];
       KB.forEach(product => {
         product.faqs.forEach(([faq, answer]) => {
           const text = normalize(`${product.title} ${faq} ${answer}`);
           let score = 0;
-          q.split(/\s+/).filter(w => w.length > 3).forEach(word => {
+          q.split(/\s+/).filter(w => w.length > 4 && !["como", "para", "quiero", "puedo", "donde", "cuando"].includes(w)).forEach(word => {
             if (text.includes(word)) score += 1;
           });
           if (q.includes("abrir") && product.id === "cuenta") score += 4;
@@ -639,14 +670,14 @@ Reglas:
         });
       });
       scored.sort((a, b) => b.score - a.score);
-      return scored[0].score > 0 ? scored[0] : null;
+      return scored[0].score >= 2 ? scored[0] : null;
     }
 
     function ask(question) {
       addMessage(question, "user");
       const hit = findAnswer(question);
       if (!hit) {
-        addMessage("No tengo información suficiente en la base aprobada para responder esa consulta. Puedo derivarte a un asesor para evitar darte información incorrecta.", "bot", ["Política: no inventar"]);
+        addMessage("No tengo información suficiente en la base aprobada para responder esa consulta. Puedo ayudarte con cuenta, tarjeta, préstamo, plazo fijo o seguro; para otros temas, te derivo a un asesor.", "bot", ["Política: no inventar"]);
         return;
       }
       const onboarding = hit.product.id === "cuenta"
