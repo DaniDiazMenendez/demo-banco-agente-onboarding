@@ -295,6 +295,32 @@
       padding: 12px;
       font-size: 13px;
     }
+    .stack-list, .journey-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .stack-list li, .journey-list li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--cp-text-muted);
+      line-height: 1.35;
+    }
+    .num {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
     pre {
       white-space: pre-wrap;
       background: var(--cp-surface-soft);
@@ -327,8 +353,8 @@
     <div class="brand"><div class="logo">B</div><span>Banco Nova · Demo AI</span></div>
     <div class="pill-row">
       <span class="pill">Industria: Servicios financieros</span>
-      <span class="pill">Frontend estático</span>
-      <span class="pill">IA simulada</span>
+      <span class="pill">Atención digital</span>
+      <span class="pill">Onboarding bancario</span>
     </div>
   </header>
 
@@ -338,10 +364,10 @@
         <div class="pill-row">
           <span class="pill">Copilot Studio</span>
           <span class="pill">Azure AI Foundry</span>
-          <span class="pill">Knowledge grounding simulado</span>
+          <span class="pill">Respuestas con fuentes</span>
         </div>
         <h1>Agente de consultas y onboarding bancario</h1>
-        <p>Demo para atención digital: responde preguntas frecuentes sobre productos bancarios, guía el onboarding y cita la fuente de la base de conocimiento. No hay conexión real a IA; las respuestas están simuladas en el frontend.</p>
+        <p>Experiencia para atención digital: responde preguntas frecuentes sobre productos bancarios, guía el onboarding y cita la fuente de la base de conocimiento aprobada.</p>
       </article>
       <article class="card">
         <h2>Valor esperado</h2>
@@ -360,8 +386,25 @@
           <h2>Productos de la KB</h2>
           <div class="product-list" id="productList"></div>
         </article>
+        <article class="card">
+          <h2>Stack de referencia</h2>
+          <ul class="stack-list">
+            <li><span class="num">1</span><span><strong>Copilot Studio</strong><br>Canales, conversación, handoff y flujos de atención.</span></li>
+            <li><span class="num">2</span><span><strong>Azure AI Foundry</strong><br>Modelos, grounding, evaluación, trazas y seguridad operacional.</span></li>
+            <li><span class="num">3</span><span><strong>Sistemas bancarios</strong><br>APIs de CRM, core bancario, scoring y documentación de producto.</span></li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Journey de onboarding</h2>
+          <ul class="journey-list">
+            <li><span class="num">1</span><span>Entender intención del cliente y producto de interés.</span></li>
+            <li><span class="num">2</span><span>Responder con base aprobada y citar fuente.</span></li>
+            <li><span class="num">3</span><span>Guiar próximos pasos sin pedir datos sensibles en chat.</span></li>
+            <li><span class="num">4</span><span>Derivar a asesor cuando falta información o requiere validación.</span></li>
+          </ul>
+        </article>
         <article class="notice">
-          Esta demo simula el comportamiento de un agente. Para producción, Copilot Studio conectaría canales, autenticación y acciones; Azure AI Foundry aportaría evaluación, trazas, modelos y grounding.
+          Para una versión productiva, el agente puede conectarse a identidad, CRM, core bancario, originación digital y handoff a contact center, manteniendo respuestas trazables a conocimiento aprobado.
         </article>
       </aside>
 
@@ -379,7 +422,7 @@
 
         <article class="card chat">
           <div>
-            <h2>Agente simulado</h2>
+            <h2>Agente digital</h2>
             <p>Probá consultas de cliente. El agente sólo responde con la base de conocimiento y cita fuente.</p>
           </div>
           <div class="messages" id="messages"></div>
