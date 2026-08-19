@@ -171,6 +171,12 @@
       top: 76px;
     }
     .product-list { display: grid; gap: 10px; }
+    .product-strip {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }
     .product-btn {
       width: 100%;
       display: grid;
@@ -183,6 +189,15 @@
       background: var(--cp-surface);
       color: var(--cp-text);
       border-radius: 12px;
+    }
+    .product-strip .product-btn {
+      grid-template-columns: 30px 1fr;
+      padding: 10px;
+    }
+    .product-strip .icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
     }
     .product-btn.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
     .icon {
@@ -202,10 +217,15 @@
     }
     .assistant-stage {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 320px;
+      grid-template-columns: minmax(0, 1fr);
       gap: 20px;
       align-items: start;
       margin-bottom: 20px;
+    }
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
     }
     .kb-grid {
       display: grid;
@@ -366,6 +386,14 @@
       padding: 7px 10px;
       font-size: 13px;
     }
+    .suggestions {
+      border-top: 1px solid var(--cp-border);
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+    .suggestions h3 {
+      margin-bottom: 8px;
+    }
     .composer {
       display: grid;
       grid-template-columns: 1fr auto;
@@ -446,7 +474,7 @@
     @media (max-width: 1100px) {
       .hero, .layout, .main-grid, .assistant-stage { grid-template-columns: 1fr; }
       .sidebar { position: static; }
-      .grid-3 { grid-template-columns: 1fr; }
+      .grid-3, .support-grid, .product-strip { grid-template-columns: 1fr; }
       .app-steps { grid-template-columns: 1fr; }
     }
   </style>
@@ -488,21 +516,21 @@
         <div>
           <h2>Asistente Banco Nova</h2>
           <p>Probá consultas de cliente. El asistente responde sólo sobre productos bancarios disponibles en la base, muestra ruta recomendada en la app y cita fuente.</p>
+          <div class="product-strip" id="productStrip"></div>
         </div>
         <div class="messages" id="messages"></div>
         <div>
-          <div class="quick" id="quickQuestions"></div>
           <div class="composer">
             <input id="userInput" placeholder="Ej: ¿Cómo sé si tengo un préstamo disponible?">
             <button class="primary" id="sendBtn">Enviar</button>
           </div>
+          <div class="suggestions">
+            <h3 id="suggestionTitle">Preguntas sugeridas</h3>
+            <div class="quick" id="quickQuestions"></div>
+          </div>
         </div>
       </article>
-      <aside class="sidebar">
-        <article class="card">
-          <h2>Productos de la KB</h2>
-          <div class="product-list" id="productList"></div>
-        </article>
+      <section class="support-grid">
         <article class="card">
           <h2>Stack de referencia</h2>
           <ul class="stack-list">
@@ -523,7 +551,7 @@
         <article class="notice">
           Para una versión productiva, el agente puede conectarse a identidad, CRM, core bancario, originación digital y handoff a contact center, manteniendo respuestas trazables a conocimiento aprobado.
         </article>
-      </aside>
+      </section>
     </section>
 
     <section class="layout">
@@ -638,7 +666,7 @@ Reglas:
 
     let selectedProduct = "cuenta";
 
-    const productList = document.getElementById("productList");
+    const productStrip = document.getElementById("productStrip");
     const kbTab = document.getElementById("kbTab");
     const instructionsTab = document.getElementById("instructionsTab");
     const testsTab = document.getElementById("testsTab");
@@ -647,17 +675,18 @@ Reglas:
     const userInput = document.getElementById("userInput");
 
     function renderProducts() {
-      productList.innerHTML = KB.map(product => `
+      productStrip.innerHTML = KB.map(product => `
         <button class="product-btn ${product.id === selectedProduct ? "active" : ""}" data-product="${product.id}">
           <span class="icon">${product.icon}</span>
           <span><strong>${product.title}</strong><br><small>${product.source}</small></span>
         </button>
       `).join("");
-      productList.querySelectorAll("button").forEach(btn => {
+      productStrip.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           selectedProduct = btn.dataset.product;
           renderProducts();
           renderKb();
+          renderQuickQuestions();
         });
       });
     }
@@ -712,7 +741,9 @@ Reglas:
     }
 
     function renderQuickQuestions() {
-      quickQuestions.innerHTML = TEST_QUESTIONS.slice(0, 4).map(question => `<button data-question="${question}">${question}</button>`).join("");
+      const product = KB.find(item => item.id === selectedProduct);
+      document.getElementById("suggestionTitle").textContent = `Preguntas sugeridas · ${product.title}`;
+      quickQuestions.innerHTML = product.faqs.map(([question]) => `<button data-question="${question}">${question}</button>`).join("");
       quickQuestions.querySelectorAll("button").forEach(btn => btn.addEventListener("click", () => ask(btn.dataset.question)));
     }
 
@@ -840,7 +871,6 @@ Reglas:
     }
 
     function ask(question) {
-      quickQuestions.classList.add("hidden");
       addMessage(question, "user");
       const hit = findAnswer(question);
       if (!hit) {
